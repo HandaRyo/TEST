@@ -41,8 +41,8 @@ handler = WebhookHandler("c706f3fca546093a1ea334bb8ea8598f")  # config.pyで設�
 SRC_IMAGE_PATH = "static/images/{}.jpg"
 MAIN_IMAGE_PATH = "static/images/{}_main.jpg"
 PREVIEW_IMAGE_PATH = "static/images/{}_preview.jpg"
-global_URL = None
-URLTEXT = global_URL
+global_URL = {}
+URLTEXT = None
 
 
 @app.route("/")
@@ -53,24 +53,25 @@ def index():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     global global_URL
-    global_URL = event.message.text
+    URLTEXT = event.message.text
+    userId = event.source.userId
 
     # line_bot_api.reply_message(
     #     event.reply_token,
     #     TextSendMessage(text=global_URL))
-    # 在這裡處理接收到的文字訊息，確認是否為網址
-    if global_URL == "QRコードを作成する":
+    if URLTEXT == "QRコードを作成する":
         line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage("URLを入力して下さい。"))
-    elif global_URL == "使い方":
+    elif URLTEXT == "使い方":
         line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage("使用説明\nSTEP1:URLを入力して下さい。\nSTEP2:画像を送信して下さい。"))
     else:
+        global_URL[userId] = URLTEXT
         line_bot_api.reply_message(
         event.reply_token, [
-        TextSendMessage(text=global_URL),#URLのオウム返し
+        TextSendMessage(text=URLTEXT),#URLのオウム返し
         TextSendMessage(text="次に画像を送信してください。")])
 
 @app.route("/callback", methods=['POST'])
@@ -95,6 +96,7 @@ def callback():
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     message_id = event.message.id#画像の格納
+    userId = event.source.userId
 
     src_image_path = Path(SRC_IMAGE_PATH.format(message_id)).absolute()
     main_image_path = MAIN_IMAGE_PATH.format(message_id)
@@ -102,10 +104,11 @@ def handle_image(event):
 
     # 画像を保存
     save_image(message_id, src_image_path)
+    URLTEXT = global_URL[userId]
 
     # 画像の加工、保存
     # 処理
-    pre(global_URL,src_image_path, main_image_path,preview_image_path)#send.pyのpre関数
+    pre(URLTEXT,src_image_path, main_image_path,preview_image_path)#send.pyのpre関数
 
     # # 画像の送信
     image_message = ImageSendMessage(
