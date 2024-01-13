@@ -205,9 +205,12 @@ def pre(URLTEXT,SRC_IMAGE_PATH, main_image_path,preview_image_path):
         
 
     try:
-        shortener=pyshorteners.Shortener()
-        shorted_link=shortener.tinyurl.short(URLTEXT)
-        URLTEXT = shorted_link
+        
+        if len(URLTEXT) > 58:
+            shortener=pyshorteners.Shortener()
+            shorted_link=shortener.tinyurl.short(URLTEXT)
+            URLTEXT = shorted_link
+
         URL = URLTEXT
         src = str(SRC_IMAGE_PATH)
 

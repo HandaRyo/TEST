@@ -122,15 +122,17 @@ def handle_image(event):
     #app.logger.info(f"https://still-oddly-shad.ngrok-free.app/{main_image_path}")
     line_bot_api.reply_message(event.reply_token, image_message)
 
-    # 画像を削除する
-    # def delayed_delete():
-    #     src_image_path.unlink()
-    #     os.remove(main_image_path)
-    #     os.remove(preview_image_path)
+    #画像を削除する
+    def delayed_delete():
+        src_image_path.unlink()
+        os.remove(main_image_path)
+        os.remove(preview_image_path)
+        del global_URL[userId]#変更
+        print(global_URL)     #変更
     
-    # delay_seconds = 20
-    # time.sleep(delay_seconds)
-    # delayed_delete()
+    delay_seconds = 20
+    time.sleep(delay_seconds)
+    delayed_delete()
 
 def save_image(message_id: str, save_path: str) -> None:
     """保存"""
